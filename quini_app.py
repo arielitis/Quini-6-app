@@ -10,9 +10,17 @@ st.set_page_config(page_title="Quini 6 App", layout="centered")
 @st.cache_data
 def cargar_datos():
     url = "https://raw.githubusercontent.com/arielitis/quini6-app/main/datos.json"
-    response = requests.get(url)
-    data = json.loads(response.text)
-    return pd.DataFrame(data)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Verifica que la respuesta sea 200
+        data = json.loads(response.text)
+        return pd.DataFrame(data)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error al obtener datos del archivo JSON: {e}")
+        return pd.DataFrame()
+    except json.JSONDecodeError as e:
+        st.error(f"Error al interpretar el archivo JSON: {e}")
+        return pd.DataFrame()
 
 def generar_jugada_probable(df, tipo_sorteo, cantidad_jugadas=1):
     df_filtrado = df[df["tipo_sorteo"] == tipo_sorteo]
