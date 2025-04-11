@@ -9,7 +9,7 @@ st.set_page_config(page_title="Quini 6 App", layout="centered")
 
 @st.cache_data
 def cargar_datos():
-    url = "https://raw.githubusercontent.com/camilovilla/quini6/main/datos.json"
+    url = "https://raw.githubusercontent.com/arielitis/quini6-app/main/datos.json"
     response = requests.get(url)
     data = json.loads(response.text)
     return pd.DataFrame(data)
