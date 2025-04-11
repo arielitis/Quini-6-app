@@ -1,48 +1,46 @@
-
 import streamlit as st
 import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+import requests
+import json
+import random
+from collections import Counter
 
-st.title("Análisis de Resultados del Quini 6")
+st.set_page_config(page_title="Quini 6 App", layout="centered")
 
 @st.cache_data
 def cargar_datos():
-    url = "https://www.loteriadesantafe.gov.ar/api/api_get_sorteos.php?juego=QUINI6"
-    return pd.read_json(url)
+    url = "https://raw.githubusercontent.com/camilovilla/quini6/main/datos.json"
+    response = requests.get(url)
+    data = json.loads(response.text)
+    return pd.DataFrame(data)
+
+def generar_jugada_probable(df, tipo_sorteo, cantidad_jugadas=1):
+    df_filtrado = df[df["tipo_sorteo"] == tipo_sorteo]
+
+    numeros = []
+    for i in range(1, 7):
+        numeros += df_filtrado[f"numero_{i}"].tolist()
+
+    conteo = Counter(numeros)
+    numeros_ordenados = [num for num, _ in conteo.most_common()]
+    jugadas = []
+
+    for _ in range(cantidad_jugadas):
+        jugada = sorted(random.sample(numeros_ordenados[:30], 6))
+        jugadas.append(jugada)
+
+    return jugadas
+
+# --- Interfaz ---
+st.title("Generador de Jugadas Probables - Quini 6")
 
 df = cargar_datos()
+tipos_sorteo = df["tipo_sorteo"].unique().tolist()
 
-# Filtrar solo columnas relevantes y convertir los resultados en listas de números
-df['numeros'] = df['resultados'].apply(lambda x: list(map(int, x.split(','))))
-todos_los_numeros = [num for sublist in df['numeros'] for num in sublist]
+tipo_sorteo_seleccionado = st.selectbox("Seleccioná el tipo de sorteo", tipos_sorteo)
+cantidad_jugadas = st.slider("Cantidad de jugadas a generar", 1, 10, 3)
 
-# Conteo de frecuencias
-frecuencia = pd.Series(todos_los_numeros).value_counts().sort_index()
-
-st.subheader("Frecuencia de aparición de cada número")
-st.bar_chart(frecuencia)
-
-# Heatmap por decena y unidad
-df_heat = pd.DataFrame(columns=range(0,10), index=["0-9", "10-19", "20-29", "30-39", "40-45"])
-df_heat = df_heat.fillna(0)
-
-for n in frecuencia.index:
-    freq = frecuencia[n]
-    decena = f"{(n//10)*10}-{(n//10)*10 + 9}" if n < 40 else "40-45"
-    col = n % 10
-    df_heat.loc[decena, col] = freq
-
-st.subheader("Heatmap de frecuencia por decenas y unidades")
-fig, ax = plt.subplots(figsize=(10, 5))
-sns.heatmap(df_heat, annot=True, fmt="d", cmap="YlGnBu", ax=ax)
-st.pyplot(fig)
-
-# Proporción pares e impares
-pares = [n for n in todos_los_numeros if n % 2 == 0]
-impares = [n for n in todos_los_numeros if n % 2 != 0]
-
-st.subheader("Proporción total de pares e impares")
-st.write(f"Pares: {len(pares)} ({len(pares) / len(todos_los_numeros) * 100:.2f}%)")
-st.write(f"Impares: {len(impares)} ({len(impares) / len(todos_los_numeros) * 100:.2f}%)")
+if st.button("Generar jugadas"):
+    jugadas = generar_jugada_probable(df, tipo_sorteo_seleccionado, cantidad_jugadas)
+    for i, jugada in enumerate(jugadas, start=1):
+        st.success(f"Jugada #{i}: {', '.join(map(str, jugada))}")
