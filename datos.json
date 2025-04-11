@@ -1,0 +1,38 @@
+[
+  {
+    "tipo_sorteo":"Tradicional",
+    "numero_1":4,
+    "numero_2":12,
+    "numero_3":18,
+    "numero_4":23,
+    "numero_5":33,
+    "numero_6":45
+  },
+  {
+    "tipo_sorteo":"Tradicional",
+    "numero_1":6,
+    "numero_2":19,
+    "numero_3":21,
+    "numero_4":29,
+    "numero_5":34,
+    "numero_6":39
+  },
+  {
+    "tipo_sorteo":"Revancha",
+    "numero_1":2,
+    "numero_2":8,
+    "numero_3":14,
+    "numero_4":27,
+    "numero_5":31,
+    "numero_6":42
+  },
+  {
+    "tipo_sorteo":"Siempre Sale",
+    "numero_1":3,
+    "numero_2":9,
+    "numero_3":17,
+    "numero_4":26,
+    "numero_5":36,
+    "numero_6":44
+  }
+]
